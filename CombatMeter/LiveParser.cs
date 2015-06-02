@@ -39,9 +39,9 @@ namespace CombatMeter
 
         //on file update, should cover new files created since they are updated with new info after?
         //since any update appends data to file a size check is enough (NotifyFilters.LastWrite triggers twice, bug, so use size instead to avoid it)
-        void FileWatcher_Changed(object sender, FileSystemEventArgs e)
+        private void FileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
-             //if a new file is detected
+             //if a new file is detected move to start of file for reading
             if (currentFile != e.Name)
             {
                 currentFile = e.Name;

@@ -19,7 +19,7 @@ namespace CombatMeter
         
         /// <summary>
         /// Parses strings of text from swtor textfile to Combat-entries.
-        /// As a new combat is detected, adds a new combatLog to the combatList. Skips all events outside of combat.
+        /// As a new combat is detected, adds a new combatLog to the combatList. Skips all entries outside of combat.
         /// </summary>
         public TextToEntryParser(CombatList list)
         {

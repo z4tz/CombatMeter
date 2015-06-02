@@ -31,9 +31,6 @@
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn DisplayMemberBinding="{Binding Timestamp, StringFormat=mm:ss.fff}" Header="TimeStamp" Width="100"/>
-
-
-
                                 <GridViewColumn DisplayMemberBinding="{Binding Source}" Header="Source" Width="100"/>
                                 <GridViewColumn DisplayMemberBinding="{Binding Target}" Header="Target" Width="100"/>
                                 <GridViewColumn DisplayMemberBinding="{Binding Ability}" Header="Ability" Width="100"/>
@@ -95,7 +92,16 @@
             </TabItem>
             <TabItem Header="Damage Done">
                 <Grid>
-                    
+                    <ListView HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding / DamageList}" >
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn DisplayMemberBinding="{Binding Ability}"  Header="Ability" Width="200"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding AbilityDamage}" Header="Total Damage" Width="100"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding AbilityDPS}" Header="DPS" Width="100"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+
                 </Grid>
             </TabItem>
         </TabControl>

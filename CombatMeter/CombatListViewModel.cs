@@ -12,7 +12,6 @@ namespace CombatMeter
         public object DataContext { get { return combatList; } }
 
 
-
         public CombatListViewModel()
         {
             combatList = new CombatList();

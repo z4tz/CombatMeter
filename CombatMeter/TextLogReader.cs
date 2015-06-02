@@ -9,7 +9,7 @@ using System.Windows;
 
 namespace CombatMeter
 {
-    //todo: remake to a static class?
+    //todo: remake to a static class? 
     class TextLogReader
     {
         string filePath;        
@@ -17,7 +17,7 @@ namespace CombatMeter
         public TextLogReader (string path)
         {
             filePath = path;
-            filePath = @"c:\combatlog3.txt";
+            filePath = @"c:\combatlog3.txt"; //todo: remove when correct path is sent in
         }
 
         public List<string> ReadFile()

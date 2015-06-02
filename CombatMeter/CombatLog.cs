@@ -11,14 +11,24 @@ using System.Diagnostics;
 
 namespace CombatMeter 
 {
+    class DamageSumation
+    {
+        public string Ability { get; set; }
+        public double AbilityDamage { get; set; }
+        public double AbilityDPS { get; set; }
+    }
+
+
     /// <summary>
     /// Contains a list of CombatEntries and various statistic from one combat, to be put in the CombatList.
     /// </summary>
     class CombatLog : INotifyPropertyChanged
     {
-        #region Properties
+        
         public ConcurrentObservableCollection<CombatEntry> EntryList { get; set; }
+        public IEnumerable<DamageSumation> DamageList { get; set; }
 
+        #region Properties
         //both start end endtime has todays date as a basis to avoid some problems with running liveparser on a datechange hopefully (if swtor uses local time for logs)
         //problems could occur if a separate file is parsed during a datechange, but much more unlikely and can just be reopened for correct result.
         public DateTime StartTime { get; set; }
@@ -72,7 +82,6 @@ namespace CombatMeter
         }
 
         private double healing;
-
         public double Healing
         {
             get { return healing; }
@@ -185,7 +194,17 @@ namespace CombatMeter
             }
         }
 
+        public double CombatTime
+        {
+            get
+            {
+                return (EndTime - StartTime).TotalSeconds;
+            }
+        }
+
         #endregion Properties
+
+
 
         public CombatLog ()
         {
@@ -201,9 +220,12 @@ namespace CombatMeter
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
                 UpdateStatistics(e);
+                UpdatePerSecondStats();
+                UpdateDamageDone();
             }
 
         }
+
 
         private void UpdateStatistics(NotifyCollectionChangedEventArgs e)
         {
@@ -256,15 +278,14 @@ namespace CombatMeter
 
                 
                 entry.Timestamp = new DateTime()+(entry.Timestamp - StartTime);
-            }
-            UpdatePerSecondStats();
+            }            
         }
 
 
         private void UpdatePerSecondStats()
         {
 
-            double seconds = (EndTime - StartTime).TotalSeconds;
+            double seconds = CombatTime; //call once to save calculations.
 
             if (seconds != 0)
             {
@@ -273,9 +294,24 @@ namespace CombatMeter
                 TPS = Threat / seconds;
                 DTPS = DamageTaken / seconds;
                 HTPS = HealingTaken / seconds;
+                var test = new { ability = "hello", value = 100 };
             }
         }
 
+
+        private void UpdateDamageDone()
+        {
+
+            DamageList =
+                from entry in EntryList
+                where entry.EntryType == "DamageEntry"
+                where entry.Source == Player
+                group entry by entry.Ability into Abilities
+                select new DamageSumation { Ability = Abilities.Key, AbilityDamage = Abilities.Sum(entry => entry.Value), AbilityDPS = Abilities.Sum(entry => entry.Value) / CombatTime };
+
+            OnPropertyChanged("DamageList");
+            
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string propertyName)
