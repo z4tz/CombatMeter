@@ -1,0 +1,105 @@
+﻿<Window x:Class="CombatMeter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:CombatMeter"
+        Title="Combat Meter" Height="600" Width="800">
+    
+    <Grid>
+        <ListBox HorizontalAlignment="Left"  VerticalAlignment="Stretch" Width="154"
+                 ItemsSource="{Binding}" IsSynchronizedWithCurrentItem="True" Margin="0,90,0,200" DisplayMemberPath="Player"  />
+        <TabControl HorizontalAlignment="Stretch"  Margin="200,88,30,30" VerticalAlignment="Stretch" >
+            <TabItem Header="Combat Log">
+                <Grid Background="#FFE5E5E5">
+                    <ListView HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding / EntryList}"
+                              IsSynchronizedWithCurrentItem="True">
+
+                        <ListView.Resources>
+                            <Style TargetType="{x:Type ListViewItem}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding EntryType}"
+                                                 Value="DamageEntry">
+                                        <Setter Property="Background" Value="LightPink"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding EntryType}"
+                                                 Value="HealEntry">
+                                        <Setter Property="Background" Value="LightGreen"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListView.Resources>
+
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn DisplayMemberBinding="{Binding Timestamp, StringFormat=mm:ss.fff}" Header="TimeStamp" Width="100"/>
+
+
+
+                                <GridViewColumn DisplayMemberBinding="{Binding Source}" Header="Source" Width="100"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Target}" Header="Target" Width="100"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Ability}" Header="Ability" Width="100"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Value, StringFormat='\{0:#0;(#0); }'}" Header="Value" Width="100"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Threat, StringFormat='\{0:#0;(#0); }'}" Header="Threat" Width="100"/>
+
+
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="Combat Statistics">
+                <Grid Background="#FFE5E5E5">
+                    <StackPanel HorizontalAlignment="Left" Height="209" Margin="27,29,0,0" VerticalAlignment="Top" Width="119" DataContext="{Binding /}">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <TextBlock Text="Damage "/>
+                            <TextBlock Text="{Binding Damage}" HorizontalAlignment="Right"/>                            
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <TextBlock Text="DPS "/>
+                            <TextBlock Text="{Binding DPS, StringFormat=0.00}" HorizontalAlignment="Right"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <TextBlock Text="Healing "/>
+                            <TextBlock Text="{Binding Healing}" HorizontalAlignment="Right"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <TextBlock Text="HPS "/>
+                            <TextBlock Text="{Binding HPS, StringFormat=0.00}" HorizontalAlignment="Right"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <TextBlock Text="Threat "/>
+                            <TextBlock Text="{Binding Threat}" HorizontalAlignment="Right"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <TextBlock Text="TPS "/>
+                            <TextBlock Text="{Binding TPS, StringFormat=0.00}" HorizontalAlignment="Right"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <TextBlock Text="Damage Taken "/>
+                            <TextBlock Text="{Binding DamageTaken}" HorizontalAlignment="Right"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <TextBlock Text="DTPS "/>
+                            <TextBlock Text="{Binding DTPS, StringFormat=0.00}" HorizontalAlignment="Right"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <TextBlock Text="Healing Taken "/>
+                            <TextBlock Text="{Binding HealingTaken}" HorizontalAlignment="Right"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <TextBlock Text="HTPS "/>
+                            <TextBlock Text="{Binding HTPS, StringFormat=0.00}" HorizontalAlignment="Right"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Damage Done">
+                <Grid>
+                    
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <Button Content="Open File" HorizontalAlignment="Left" Margin="42,0,0,116" VerticalAlignment="Bottom" Width="75" Click="Button_Click" RenderTransformOrigin="-0.786,0.388"/>
+        <Button x:Name="LiverParserButton" Content="LiveParser" HorizontalAlignment="Left" Margin="42,493,0,0" VerticalAlignment="Top" Width="75" Click="LiverParserButton_Click"/>
+    </Grid>
+</Window>
