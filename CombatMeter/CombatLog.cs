@@ -297,7 +297,7 @@ namespace CombatMeter
                 var test = new { ability = "hello", value = 100 };
             }
         }
-
+        
 
         private void UpdateDamageDone()
         {
