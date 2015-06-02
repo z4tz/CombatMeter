@@ -20,7 +20,7 @@ namespace CombatMeter
 
 
     /// <summary>
-    /// Contains a list of CombatEntries and various statistic from one combat, to be put in the CombatList.
+    /// Contains a list of CombatEntries and various statistic from one combat, to be put in the CombatList
     /// </summary>
     class CombatLog : INotifyPropertyChanged
     {
