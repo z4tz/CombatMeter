@@ -9,8 +9,11 @@ using System.Threading.Tasks;
 
 namespace CombatMeter
 {
+
+    //todo: possibly rewrite so that file is kept open (should be safe with fileshare.readwrite) and simply polled.
     class LiveParser
     {
+        string logDirectory;
         string currentFile="";
         long previousLength;
         FileSystemWatcher fileWatcher;
@@ -21,6 +24,7 @@ namespace CombatMeter
         //
         public LiveParser(CombatList _combatList)
         {
+            logDirectory = Environment.ExpandEnvironmentVariables(@"%USERPROFILE%\Documents\Star Wars - The Old Republic\CombatLogs\");
             combatList = _combatList;
             textParser = new TextToEntryParser(combatList);
             FindLatestFile();
@@ -28,15 +32,19 @@ namespace CombatMeter
             AddFileWatcherEvents();
         }
 
+
         private void FindLatestFile()
         {
-            //todo: find latest changed file and set to currentfile at parsers start
+            var directory = new DirectoryInfo(logDirectory);
+            currentFile = directory.GetFiles().OrderByDescending(file => file.LastWriteTime).First().FullName;
         }
 
+
+        //Events for finding new files in logDirectory
         private void AddFileWatcherEvents()
         {
             fileWatcher = new FileSystemWatcher();
-            fileWatcher.Path = @"C:\Users\Malm\Documents\Star Wars - The Old Republic\CombatLogs\"; //todo: set to global value with path of SWTOR log folder?
+            fileWatcher.Path = logDirectory; //todo: set to global value with path of SWTOR log folder?
             fileWatcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.CreationTime;
             fileWatcher.Filter = "*.txt";
 
@@ -46,7 +54,7 @@ namespace CombatMeter
 
         void fileWatcher_Created(object sender, FileSystemEventArgs e)
         {
-            currentFile = e.FullPath;
+            currentFile = e.FullPath;            
             previousLength = 0; //if a new file is detected move to start of file for reading
         }
 
@@ -56,12 +64,21 @@ namespace CombatMeter
             LiveParserTokenSource = new CancellationTokenSource();
             var LiveParserToken = LiveParserTokenSource.Token;
             
-            await PeriodicTask.Run(ReadChanges, TimeSpan.FromMilliseconds(1000), LiveParserToken);
+            await Task.Run(async () =>
+                {
+                    await PeriodicTask.Run(ReadChanges, TimeSpan.FromMilliseconds(1000.0), LiveParserToken);
+                });
+            //await PeriodicTask.Run(ReadChanges, TimeSpan.FromMilliseconds(1000.0), LiveParserToken);     
         }
 
+        //todo: check that a a cancelation-token can be used when it's active in another thread.
        public void Stop()
         {
-            LiveParserTokenSource.Cancel();
+            if (LiveParserTokenSource.Token.CanBeCanceled)
+            {
+                LiveParserTokenSource.Cancel();
+            }
+            
         }               
 
 
@@ -70,7 +87,7 @@ namespace CombatMeter
             if (currentFile != "")
             {
                 //todo: see if this can be done in a better way
-                while (IsFileLocked(currentFile)) //wait until file is not locked, dirty version
+                while (IsFileLocked(currentFile)) //if file is unavalable, wait.  dirty version
                 {
                     Thread.Sleep(100);
                 }
@@ -92,7 +109,15 @@ namespace CombatMeter
                 }
                 foreach (var line in textList)
                 {
-                    textParser.CreateEntry(line);
+                    try
+                    {
+                        textParser.CreateEntry(line);
+                    }
+                    catch (Exception)
+                    {
+
+                        Debug.WriteLine(line);
+                    }
                 } 
             }
         }

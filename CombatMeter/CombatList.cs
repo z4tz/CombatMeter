@@ -16,11 +16,8 @@ namespace CombatMeter
     /// Contains a List of CombatLogs, and methods for parsing data to the CombatLogs.
     /// </summary>
     class CombatList : ConcurrentObservableCollection<CombatLog>
-    {
-        private Task liveParserTask;
-        
+    {       
         LiveParser liveParser;
-
 
         public CombatList()
         {
@@ -63,12 +60,12 @@ namespace CombatMeter
                 Debug.WriteLine(sw.Elapsed + " For " + TextToEntryParser.EntryCount + " entries");
                 TextToEntryParser.EntryCount = 0;                
             });
-
-
+            
             
         }
         public void StartParser()
         {
+            this.Clear(); //Clear old data before starting parser
             liveParser.Start();
         }
 
