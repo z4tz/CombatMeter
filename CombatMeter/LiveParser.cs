@@ -5,75 +5,96 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace CombatMeter
 {
     class LiveParser
     {
-        string currentFile;
+        string currentFile="";
         long previousLength;
         FileSystemWatcher fileWatcher;
         CombatList combatList;
         TextToEntryParser textParser;
+        CancellationTokenSource LiveParserTokenSource;
 
         //
         public LiveParser(CombatList _combatList)
         {
             combatList = _combatList;
             textParser = new TextToEntryParser(combatList);
+            FindLatestFile();
+
             AddFileWatcherEvents();
         }
 
+        private void FindLatestFile()
+        {
+            //todo: find latest changed file and set to currentfile at parsers start
+        }
 
         private void AddFileWatcherEvents()
         {
             fileWatcher = new FileSystemWatcher();
-            fileWatcher.Path = @"c:\SWtest\"; //todo: set to global value with path of SWTOR log folder?
-            fileWatcher.NotifyFilter = NotifyFilters.FileName| NotifyFilters.Size;
+            fileWatcher.Path = @"C:\Users\Malm\Documents\Star Wars - The Old Republic\CombatLogs\"; //todo: set to global value with path of SWTOR log folder?
+            fileWatcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.CreationTime;
             fileWatcher.Filter = "*.txt";
 
-            fileWatcher.Changed += FileWatcher_Changed;
+            fileWatcher.Created += fileWatcher_Created;
             fileWatcher.EnableRaisingEvents = true;
         }
 
-
-        //on file update, should cover new files created since they are updated with new info after?
-        //since any update appends data to file a size check is enough (NotifyFilters.LastWrite triggers twice, bug, so use size instead to avoid it)
-        private void FileWatcher_Changed(object sender, FileSystemEventArgs e)
+        void fileWatcher_Created(object sender, FileSystemEventArgs e)
         {
-             //if a new file is detected move to start of file for reading
-            if (currentFile != e.Name)
-            {
-                currentFile = e.Name;
-                previousLength = 0;
-            }
+            currentFile = e.FullPath;
+            previousLength = 0; //if a new file is detected move to start of file for reading
+        }
 
-            //todo: see if this can be done in a better way
-            while (IsFileLocked(e.FullPath)) //wait until file is not locked, dirty version
-            {
-                Thread.Sleep(10);
-            }
-            List<string> textList = new List<string>();
-            using (var fileStream = File.OpenRead(e.FullPath))
-            {
-                fileStream.Position = previousLength; //move stream to previous position
 
-                previousLength = fileStream.Length; //update with current file length.
+        public async void Start()
+        {
+            LiveParserTokenSource = new CancellationTokenSource();
+            var LiveParserToken = LiveParserTokenSource.Token;
+            
+            await PeriodicTask.Run(ReadChanges, TimeSpan.FromMilliseconds(1000), LiveParserToken);
+        }
 
-                using (var streamReader = new StreamReader(fileStream))
+       public void Stop()
+        {
+            LiveParserTokenSource.Cancel();
+        }               
+
+
+        private void ReadChanges()
+        {
+            if (currentFile != "")
+            {
+                //todo: see if this can be done in a better way
+                while (IsFileLocked(currentFile)) //wait until file is not locked, dirty version
                 {
-                    while (!streamReader.EndOfStream)
+                    Thread.Sleep(100);
+                }
+                List<string> textList = new List<string>();
+                using (var fileStream = File.Open(currentFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    fileStream.Position = previousLength; //move stream to previous position
+
+                    previousLength = fileStream.Length; //update with current file length.
+
+                    using (var streamReader = new StreamReader(fileStream))
                     {
-                        textList.Add(streamReader.ReadLine());
-                        //textParser.CreateEntry(streamReader.ReadLine()); //todo: move create-entry to after file is closed
+                        while (!streamReader.EndOfStream)
+                        {
+                            textList.Add(streamReader.ReadLine());
+                            //textParser.CreateEntry(streamReader.ReadLine()); //todo: move create-entry to after file is closed
+                        }
                     }
                 }
+                foreach (var line in textList)
+                {
+                    textParser.CreateEntry(line);
+                } 
             }
-            foreach (var line in textList)
-            {
-                textParser.CreateEntry(line);
-            }
-
         }
 
 
@@ -82,10 +103,11 @@ namespace CombatMeter
             FileStream stream = null;
             try
             {
-                stream = File.OpenRead(filePath);
+                stream = File.Open(filePath,FileMode.Open,FileAccess.Read,FileShare.ReadWrite);
             }
             catch (IOException)
             {
+                Debug.WriteLine("file locked");
                 //file locked;
                 return true;
             }
@@ -98,6 +120,8 @@ namespace CombatMeter
             return false;
 
         }
+
+
 
 
 

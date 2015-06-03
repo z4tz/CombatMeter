@@ -18,10 +18,13 @@ namespace CombatMeter
     class CombatList : ConcurrentObservableCollection<CombatLog>
     {
         private Task liveParserTask;
+        
+        LiveParser liveParser;
+
 
         public CombatList()
         {
-            
+            liveParser = new LiveParser(this);
         }
 
         /// <summary>
@@ -64,25 +67,14 @@ namespace CombatMeter
 
             
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public void StartParser()
         {
-            liveParserTask = Task.Run(() =>
-            {
-                LiveParser liveParser = new LiveParser(this);                
-            });
+            liveParser.Start();
         }
 
         public void StopParser()
         {
-            //todo: cancel parser if active
-            if (liveParserTask != null && liveParserTask.Status == TaskStatus.Running)
-            {
-                
-            }
+            liveParser.Stop();
         }
 
 

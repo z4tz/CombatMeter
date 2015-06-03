@@ -301,7 +301,6 @@ namespace CombatMeter
 
         private void UpdateDamageDone()
         {
-
             DamageList =
                 from entry in EntryList
                 where entry.EntryType == "DamageEntry"
@@ -309,8 +308,7 @@ namespace CombatMeter
                 group entry by entry.Ability into Abilities
                 select new DamageSumation { Ability = Abilities.Key, AbilityDamage = Abilities.Sum(entry => entry.Value), AbilityDPS = Abilities.Sum(entry => entry.Value) / CombatTime };
 
-            OnPropertyChanged("DamageList");
-            
+            OnPropertyChanged("DamageList");            
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
