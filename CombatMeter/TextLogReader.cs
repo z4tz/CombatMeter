@@ -10,17 +10,9 @@ using System.Windows;
 namespace CombatMeter
 {
     //todo: remake to a static class? 
-    class TextLogReader
+    static class TextLogReader
     {
-        string filePath;        
-
-        public TextLogReader (string path)
-        {
-            filePath = path;
-            filePath = @"c:\combatlog3.txt"; //todo: remove when correct path is sent in
-        }
-
-        public List<string> ReadFile()
+        public static List<string> ReadFile(string filePath)
         {
             List<string> textList = new List<string>();
             

@@ -17,9 +17,9 @@ namespace CombatMeter
             combatList = new CombatList();
         }
 
-        public void ParseFile()
+        public void ParseFile(string FilePath)
         {
-            combatList.ParseFile("");
+            combatList.ParseFile(FilePath);
         }
 
         public void StartLiveParser()

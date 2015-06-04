@@ -40,7 +40,7 @@ namespace CombatMeter
         
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            viewModel.ParseFile();
+            viewModel.ParseFile(@"c:\combatlog3.txt");
             //todo: window for selecting file(s?) and parse filename+path
         }
 

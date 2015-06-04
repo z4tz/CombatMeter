@@ -39,8 +39,8 @@ namespace CombatMeter
                 sw.Start();
 
                 
-                TextLogReader reader = new TextLogReader(FilePath);
-                List<string> textList = reader.ReadFile();
+                
+                List<string> textList = TextLogReader.ReadFile(FilePath);
                 TextToEntryParser parser = new TextToEntryParser(this);
                 
                 foreach (var line in textList)
