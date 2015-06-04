@@ -11,6 +11,7 @@ namespace CombatMeter
 {
 
     //todo: possibly rewrite so that file is kept open (should be safe with fileshare.readwrite) and simply polled.
+    //todo: add feature to skip previous combats in current logfile until latest if it's not complete.
     class LiveParser
     {
         string logDirectory; //where
@@ -69,7 +70,7 @@ namespace CombatMeter
         /// Start periodically look for updates in logfile
         /// </summary>
         /// <param name="period">How often it should look, in milliseconds.</param>
-        public async void Start(double period=1000)
+        public async void Start(double period=100)
         {
             LiveParserTokenSource = new CancellationTokenSource();
             var CancellationToken = LiveParserTokenSource.Token;
@@ -95,7 +96,7 @@ namespace CombatMeter
             }
         }
 
-        //todo: check that a a cancelation-token can be used when it's active in another thread.
+
        public void Stop()
         {
             if (LiveParserTokenSource.Token.CanBeCanceled)
@@ -105,7 +106,6 @@ namespace CombatMeter
             RemoveFileWatcherEvents();
         }
               
-
 
         private void ReadChanges()
         {
@@ -125,25 +125,27 @@ namespace CombatMeter
                     {
                         while (!streamReader.EndOfStream)
                         {
+                            
                             string line = streamReader.ReadLine();
                             if (textParser.ValidEntry(line))
-                            {
+                            {                                
                                 textList.Add(line);
                             }
                             else if (badMatchCount>=maxBadMatch) // if to many, skip line and just move on.
-                            {
-                                badMatchCount = 0;
+                            {          
+                                Debug.WriteLine(line);
                                 continue;
                             }
                             else // retry on next read.
                             {
-                                badMatchCount++;
+                                badMatchCount++;                                
                                 return;                                
                             }                            
                         }
                         previousPosition = fileStream.Length;
                     }
                 }
+
                 foreach (var line in textList)
                 {
                     try
@@ -156,7 +158,8 @@ namespace CombatMeter
 
                         Debug.WriteLine(line);
                     }
-                } 
+                }
+                badMatchCount = 0; //when written
             }
         }
 

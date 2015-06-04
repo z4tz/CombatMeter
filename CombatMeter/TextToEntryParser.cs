@@ -16,7 +16,7 @@ namespace CombatMeter
         CombatList combatList;
         bool inCombat = false;
         CombatLog currentCombat;
-        private string pattern = @"\[(?<timeStamp>[0-9:.]{1,}?)\] \[(?<source>[A-z0-9:.\{\}\@\-\' ]{1,}?)?\] \[(?<target>[A-z0-9:.\{\}\@\-\' ]{1,}?)\] ?\[(?<ability>[A-z0-9:.\{\}\(\) ]{1,}?)?\] ?\[(?<effect>[A-z0-9:.\{\} ]{1,}?)?\] ?\((?<value>[A-z0-9:.\{\}\*\(\)\- ]{1,})?\) ?<?(?<threat>[0-9]{1,})?>?";
+        private string pattern = @"\[(?<timeStamp>[0-9:.]{1,}?)\] \[(?<source>[A-z0-9:.\{\}\@\-\' ]{1,}?)?\] \[(?<target>[A-z0-9:.\{\}\@\-\' ]{1,}?)\] ?\[(?<ability>[A-z0-9:.\{\}\(\) ]{1,}?)?\] ?\[(?<effect>[A-z0-9:.\{\}() ]{1,}?)?\] ?\((?<value>[A-z0-9:.\{\}\*\(\)\- ]{1,})?\) ?<?(?<threat>[0-9]{1,})?>?";
         
         /// <summary>
         /// Parses strings of text from swtor textfile to Combat-entries.
