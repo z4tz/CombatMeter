@@ -13,13 +13,15 @@ namespace CombatMeter
     //todo: possibly rewrite so that file is kept open (should be safe with fileshare.readwrite) and simply polled.
     class LiveParser
     {
-        string logDirectory;
+        string logDirectory; //where
         string currentFile="";
-        long previousLength;
+        long previousPosition;
         FileSystemWatcher fileWatcher;
         CombatList combatList;
         TextToEntryParser textParser;
         CancellationTokenSource LiveParserTokenSource;
+        int badMatchCount = 0;
+        int maxBadMatch = 10; //how many times in a row a bad match can be made before skipping past
 
         //
         public LiveParser(CombatList _combatList)
@@ -27,9 +29,7 @@ namespace CombatMeter
             logDirectory = Environment.ExpandEnvironmentVariables(@"%USERPROFILE%\Documents\Star Wars - The Old Republic\CombatLogs\");
             combatList = _combatList;
             textParser = new TextToEntryParser(combatList);
-            FindLatestFile();
-
-            AddFileWatcherEvents();
+            FindLatestFile();            
         }
 
 
@@ -51,24 +51,48 @@ namespace CombatMeter
             fileWatcher.Created += fileWatcher_Created;
             fileWatcher.EnableRaisingEvents = true;
         }
+        
+        private void RemoveFileWatcherEvents()
+        {
+            fileWatcher.Created -= fileWatcher_Created;
+            fileWatcher.EnableRaisingEvents = false;
+        } 
 
-        void fileWatcher_Created(object sender, FileSystemEventArgs e)
+        //On new file created in watched folder
+        private void fileWatcher_Created(object sender, FileSystemEventArgs e)
         {
             currentFile = e.FullPath;            
-            previousLength = 0; //if a new file is detected move to start of file for reading
+            previousPosition = 0; //if a new file is detected move to start of file for reading
         }
 
-
-        public async void Start()
+        /// <summary>
+        /// Start periodically look for updates in logfile
+        /// </summary>
+        /// <param name="period">How often it should look, in milliseconds.</param>
+        public async void Start(double period=1000)
         {
             LiveParserTokenSource = new CancellationTokenSource();
-            var LiveParserToken = LiveParserTokenSource.Token;
-            
-            await Task.Run(async () =>
+            var CancellationToken = LiveParserTokenSource.Token;
+
+            AddFileWatcherEvents();
+
+            try
+            {
+                await Task.Run(async () =>
                 {
-                    await PeriodicTask.Run(ReadChanges, TimeSpan.FromMilliseconds(1000.0), LiveParserToken);
-                });
-            //await PeriodicTask.Run(ReadChanges, TimeSpan.FromMilliseconds(1000.0), LiveParserToken);     
+                    await PeriodicTask.Run(ReadChanges, TimeSpan.FromMilliseconds(period), CancellationToken);
+
+                }, CancellationToken
+                );
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+            }
+            finally
+            {
+                LiveParserTokenSource.Dispose();
+            }
         }
 
         //todo: check that a a cancelation-token can be used when it's active in another thread.
@@ -76,10 +100,11 @@ namespace CombatMeter
         {
             if (LiveParserTokenSource.Token.CanBeCanceled)
             {
-                LiveParserTokenSource.Cancel();
+                LiveParserTokenSource.Cancel();                
             }
-            
-        }               
+            RemoveFileWatcherEvents();
+        }
+              
 
 
         private void ReadChanges()
@@ -94,23 +119,36 @@ namespace CombatMeter
                 List<string> textList = new List<string>();
                 using (var fileStream = File.Open(currentFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    fileStream.Position = previousLength; //move stream to previous position
-
-                    previousLength = fileStream.Length; //update with current file length.
+                    fileStream.Position = previousPosition; //move stream to previous position                                       
 
                     using (var streamReader = new StreamReader(fileStream))
                     {
                         while (!streamReader.EndOfStream)
                         {
-                            textList.Add(streamReader.ReadLine());
-                            //textParser.CreateEntry(streamReader.ReadLine()); //todo: move create-entry to after file is closed
+                            string line = streamReader.ReadLine();
+                            if (textParser.ValidEntry(line))
+                            {
+                                textList.Add(line);
+                            }
+                            else if (badMatchCount>=maxBadMatch) // if to many, skip line and just move on.
+                            {
+                                badMatchCount = 0;
+                                continue;
+                            }
+                            else // retry on next read.
+                            {
+                                badMatchCount++;
+                                return;                                
+                            }                            
                         }
+                        previousPosition = fileStream.Length;
                     }
                 }
                 foreach (var line in textList)
                 {
                     try
                     {
+
                         textParser.CreateEntry(line);
                     }
                     catch (Exception)

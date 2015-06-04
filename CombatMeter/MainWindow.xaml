@@ -106,6 +106,6 @@
             </TabItem>
         </TabControl>
         <Button Content="Open File" HorizontalAlignment="Left" Margin="42,0,0,116" VerticalAlignment="Bottom" Width="75" Click="Button_Click" RenderTransformOrigin="-0.786,0.388"/>
-        <Button x:Name="LiverParserButton" Content="LiveParser" HorizontalAlignment="Left" Margin="42,493,0,0" VerticalAlignment="Top" Width="75" Click="LiverParserButton_Click"/>
+        <Button x:Name="LiverParserButton" Content="LiveParser" HorizontalAlignment="Left" Margin="42,0,0,57" VerticalAlignment="Bottom" Width="75" Click="LiverParserButton_Click"/>
     </Grid>
 </Window>

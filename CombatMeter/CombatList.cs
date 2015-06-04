@@ -27,8 +27,8 @@ namespace CombatMeter
         /// <summary>
         /// Parses and adds entries found in textfile to new combatlog in List
         /// </summary>
-        /// <param name="FileName">Swtor text combat log</param>
-        public void ParseFile(string FileName)
+        /// <param name="FilePath">Swtor text combat log</param>
+        public void ParseFile(string FilePath)
         {
 
             var task = Task.Run(() =>
@@ -39,7 +39,7 @@ namespace CombatMeter
                 sw.Start();
 
                 
-                TextLogReader reader = new TextLogReader(FileName);
+                TextLogReader reader = new TextLogReader(FilePath);
                 List<string> textList = reader.ReadFile();
                 TextToEntryParser parser = new TextToEntryParser(this);
                 

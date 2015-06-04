@@ -15,11 +15,9 @@ namespace CombatMeter
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                Debug.WriteLine("hello");
-                    await Task.Delay(period, cancellationToken);
-                    action();
-
-            }
+                await Task.Delay(period, cancellationToken);
+                action();
+            }            
         }
 
         public static Task Run(Action action, TimeSpan period)

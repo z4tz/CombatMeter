@@ -25,6 +25,10 @@ namespace CombatMeter
     {
         
         CombatListViewModel viewModel;
+        bool LiveParserRunning;
+
+
+
         public MainWindow()
         {
             InitializeComponent();
@@ -42,8 +46,20 @@ namespace CombatMeter
 
         private void LiverParserButton_Click(object sender, RoutedEventArgs e)
         {
-            viewModel.StartLiveParser();
-
+            if (!LiveParserRunning)
+            {
+                
+                LiverParserButton.Background = Brushes.LightGreen;
+                viewModel.StartLiveParser();
+                LiveParserRunning = true;
+            }
+            else
+            {
+                
+                LiverParserButton.Background = SystemColors.WindowBrush;
+                viewModel.StopLiveParser();
+                LiveParserRunning = false;
+            }                        
         }
 
     }

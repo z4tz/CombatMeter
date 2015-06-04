@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 
 namespace CombatMeter
@@ -26,10 +27,14 @@ namespace CombatMeter
             combatList = list;            
         }
 
+        public bool ValidEntry(string line)
+        {
+            return Regex.IsMatch(line,pattern);
+        }
+
         public  void CreateEntry(string line)
         {
             CombatEntry entry;
-
 
             if (line.Contains(": Damage {"))
             {
