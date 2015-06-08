@@ -18,59 +18,45 @@ namespace CombatMeter
     class CombatList : ConcurrentObservableCollection<CombatLog>
     {       
         LiveParser liveParser;
+        FileParser fileParser;
 
         public CombatList()
         {
             liveParser = new LiveParser(this);
+            fileParser = new FileParser(this);
         }
 
         /// <summary>
-        /// Parses and adds entries found in textfile to new combatlog in List
+        /// Parses and adds entries found in textfile to new combatlog in List, clears previous entries
         /// </summary>
-        /// <param name="FilePath">Swtor text combat log</param>
-        public void ParseFile(string FilePath)
+        /// <param name="File">Swtor text combat log</param>
+        public void ParseFile(string file)
         {
-
-            var task = Task.Run(() =>
-            {
-                this.Clear();
-
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-
-                
-                
-                List<string> textList = TextLogReader.ReadFile(FilePath);
-                TextToEntryParser parser = new TextToEntryParser(this);
-                
-                foreach (var line in textList)
-                {
-                    try
-                    {
-                        parser.CreateEntry(line);
-                    }
-                    catch (Exception)
-                    {
-                        Debug.WriteLine(line);
-                        //Todo: write missed lines into a file to gather.
-                        //also include exception message for better idea of why.
-                    }
-                }
-                sw.Stop();
-                Debug.WriteLine(sw.Elapsed + " For " + TextToEntryParser.EntryCount + " entries");
-                TextToEntryParser.EntryCount = 0;                
-            });
-            
-            
+            this.Clear();
+            fileParser.ParseFile(file);
         }
+        /// <summary>
+        /// Use to parse multiple files, will not clear in between each file.
+        /// </summary>
+        /// <param name="files"></param>
+        public void ParseFiles(string[] files)
+        {
+            this.Clear();
+            fileParser.ParseFiles(files);
+        }
+        /// <summary>
+        /// Start the Liveparser, will clear previous entries
+        /// </summary>
         public void StartParser()
         {
             this.Clear(); //Clear old data before starting parser
             liveParser.Start();
         }
-
+        /// <summary>
+        /// Stop the LiveParser.
+        /// </summary>
         public void StopParser()
-        {
+        {            
             liveParser.Stop();
         }
 

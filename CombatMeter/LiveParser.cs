@@ -127,7 +127,7 @@ namespace CombatMeter
                         {
                             
                             string line = streamReader.ReadLine();
-                            if (textParser.ValidEntry(line))
+                            if (textParser.ValidateString(line))
                             {                                
                                 textList.Add(line);
                             }

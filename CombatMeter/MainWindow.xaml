@@ -10,7 +10,7 @@
         <TabControl HorizontalAlignment="Stretch"  Margin="200,88,30,30" VerticalAlignment="Stretch" >
             <TabItem Header="Combat Log">
                 <Grid Background="#FFE5E5E5">
-                    <ListView HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding / EntryList}"
+                    <ListView x:Name="CombatLogListView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding / EntryList}"
                               IsSynchronizedWithCurrentItem="True">
 
                         <ListView.Resources>
@@ -105,7 +105,7 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <Button Content="Open File" HorizontalAlignment="Left" Margin="42,0,0,116" VerticalAlignment="Bottom" Width="75" Click="Button_Click" RenderTransformOrigin="-0.786,0.388"/>
+        <Button x:Name="OpenFileButton" Content="Open File" HorizontalAlignment="Left" Margin="42,0,0,116" VerticalAlignment="Bottom" Width="75" Click="OpenFileButton_Click" RenderTransformOrigin="-0.786,0.388"/>
         <Button x:Name="LiverParserButton" Content="LiveParser" HorizontalAlignment="Left" Margin="42,0,0,57" VerticalAlignment="Bottom" Width="75" Click="LiverParserButton_Click"/>
     </Grid>
 </Window>

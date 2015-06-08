@@ -32,8 +32,13 @@ namespace CombatMeter
             combatList.StopParser();
         }
 
-        
 
-        
+
+
+
+        public void ParseFiles(string[] files)
+        {
+            combatList.ParseFiles(files);
+        }
     }
 }

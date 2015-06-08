@@ -27,7 +27,7 @@ namespace CombatMeter
             combatList = list;            
         }
 
-        public bool ValidEntry(string line)
+        public bool ValidateString(string line)
         {
             return Regex.IsMatch(line,pattern);
         }

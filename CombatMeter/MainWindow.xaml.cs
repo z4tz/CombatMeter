@@ -36,12 +36,43 @@ namespace CombatMeter
 
             this.DataContext = viewModel.DataContext;
 
+            CombatLogListView.ItemContainerGenerator.StatusChanged += ItemContainerGenerator_StatusChanged;
+
+
+        }
+
+
+        // to scroll down, look at!
+        void ItemContainerGenerator_StatusChanged(object sender, EventArgs e)
+        {
+            if (CombatLogListView.ItemContainerGenerator.Status == System.Windows.Controls.Primitives.GeneratorStatus.ContainersGenerated)
+            {
+                var item = CombatLogListView.Items[CombatLogListView.Items.Count - 1];
+
+                if (item == null)
+                {
+                    return;
+                }
+                    CombatLogListView.ScrollIntoView(item);
+            }
         }
         
-        private void Button_Click(object sender, RoutedEventArgs e)
+
+        private void OpenFileButton_Click(object sender, RoutedEventArgs e)
         {
-            viewModel.ParseFile(@"c:\combatlog3.txt");
-            //todo: window for selecting file(s?) and parse filename+path
+            Microsoft.Win32.OpenFileDialog openFileDlg = new Microsoft.Win32.OpenFileDialog();
+
+            openFileDlg.DefaultExt = ".txt";
+            openFileDlg.Filter = "Text documents (.txt)|*.txt";
+            openFileDlg.Multiselect = true;
+            openFileDlg.InitialDirectory = Environment.ExpandEnvironmentVariables(@"%USERPROFILE%\Documents\Star Wars - The Old Republic\CombatLogs\");
+
+            var itemsWereSelected = openFileDlg.ShowDialog();
+
+            if (itemsWereSelected == true)
+            {
+                viewModel.ParseFiles(openFileDlg.FileNames);
+            }            
         }
 
         private void LiverParserButton_Click(object sender, RoutedEventArgs e)
@@ -50,6 +81,7 @@ namespace CombatMeter
             {
                 
                 LiverParserButton.Background = Brushes.LightGreen;
+                OpenFileButton.IsEnabled = false; //disable to prevent opening during liveparsing.
                 viewModel.StartLiveParser();
                 LiveParserRunning = true;
             }
@@ -57,6 +89,7 @@ namespace CombatMeter
             {
                 
                 LiverParserButton.Background = SystemColors.WindowBrush;
+                OpenFileButton.IsEnabled = true;
                 viewModel.StopLiveParser();
                 LiveParserRunning = false;
             }                        
